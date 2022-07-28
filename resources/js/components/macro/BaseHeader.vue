@@ -9,6 +9,7 @@
                     <ul class="d-flex">
                         <li><router-link :to="{ name: 'home' }">Home</router-link></li>
                         <li class="mx-3"><router-link :to="{ name: 'about' }">Chi Siamo</router-link></li>
+                        <li class="mx-3"><router-link :to="{ name: 'categories' }">Categorie</router-link></li>
                         <li><a href="/admin/home">Area Utente</a></li>
                     </ul>
                 </nav>

@@ -4,9 +4,12 @@ import VueRouter from "vue-router";
 Vue.use(VueRouter);
 
 import Home from "./pages/Home";
-import About from "./pages/About"
-import Page404 from "./pages/Page404"
-import SinglePost from "./pages/SinglePost"
+import About from "./pages/About";
+import SinglePost from "./pages/SinglePost";
+import Categories from "./pages/Categories";
+import SingleCategory from "./pages/SingleCategory";
+import Page404 from "./pages/Page404";
+
 const router = new VueRouter({
     mode: "history",
     routes: [
@@ -25,11 +28,16 @@ const router = new VueRouter({
             name: "single-post",
             component: SinglePost
         },
-        // {
-        //     path: "/posts/category",
-        //     name: "categories",
-        //     component: Categories
-        // },
+        {
+            path: "/categorie",
+            name: "categories",
+            component: Categories
+        },
+        {
+            path: "/categorie/:slug",
+            name: "single-category",
+            component: SingleCategory
+        },
         {
             path: "/*",
             name: "error-404",
