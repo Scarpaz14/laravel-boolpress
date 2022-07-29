@@ -2580,7 +2580,12 @@ var render = function render() {
 
   return _vm.post ? _c("div", {
     staticClass: "container"
-  }, [_c("h1", [_vm._v(_vm._s(_vm.post.title))]), _vm._v(" "), _c("p", [_vm._v(_vm._s(_vm.post.content))]), _vm._v(" "), _c("h3", [_vm._v("Autore di questo post: " + _vm._s(_vm.post.user.name))]), _vm._v(" "), _vm.post.category ? _c("p", [_vm._v("Categoria: " + _vm._s(_vm.post.category.name))]) : _vm._e(), _vm._v(" "), _vm.post.tags.length > 0 ? _c("div", [_c("h4", [_vm._v("Lista tags")]), _vm._v(" "), _c("ul", _vm._l(_vm.post.tags, function (tag) {
+  }, [_c("h1", [_vm._v(_vm._s(_vm.post.title))]), _vm._v(" "), _vm.post.image ? _c("img", {
+    attrs: {
+      src: _vm.post.image_path,
+      alt: _vm.post.title
+    }
+  }) : _vm._e(), _vm._v(" "), _c("p", [_vm._v(_vm._s(_vm.post.content))]), _vm._v(" "), _c("h3", [_vm._v("Autore di questo post: " + _vm._s(_vm.post.user.name))]), _vm._v(" "), _vm.post.category ? _c("p", [_vm._v("Categoria: " + _vm._s(_vm.post.category.name))]) : _vm._e(), _vm._v(" "), _vm.post.tags.length > 0 ? _c("div", [_c("h4", [_vm._v("Lista tags")]), _vm._v(" "), _c("ul", _vm._l(_vm.post.tags, function (tag) {
     return _c("li", {
       key: tag.id
     }, [_c("router-link", {
@@ -19841,7 +19846,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _pages_SinglePost__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./pages/SinglePost */ "./resources/js/pages/SinglePost.vue");
 /* harmony import */ var _pages_Categories__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./pages/Categories */ "./resources/js/pages/Categories.vue");
 /* harmony import */ var _pages_SingleCategory__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./pages/SingleCategory */ "./resources/js/pages/SingleCategory.vue");
-/* harmony import */ var _pages_SingleTag__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./pages/SingleTag */ "./resources/js/pages/SingleTag.vue");
+/* harmony import */ var _pages_SingleTag__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./pages/SingleTag */ "./resources/js/pages/SingleTag.vue");
 /* harmony import */ var _pages_Page404__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./pages/Page404 */ "./resources/js/pages/Page404.vue");
 
 
@@ -19878,7 +19883,7 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   }, {
     path: "/tag/:slug",
     name: "single-tag",
-    component: _pages_SingleTag__WEBPACK_IMPORTED_MODULE_9__["default"]
+    component: _pages_SingleTag__WEBPACK_IMPORTED_MODULE_7__["default"]
   }, {
     path: "/*",
     name: "error-404",

@@ -17,6 +17,12 @@
                 {{$post->content}}
             </div>
 
+            @if($post->image)
+            <div class="mb-4">
+                <img class="img-fluid" src="{{asset("storage/{$post->image}")}}" alt="">
+            </div>
+            @endif
+
             {{-- //accediamo ai tags associati al post, usiamo come metodo della nostra relazione sottoforma di proprieta' --}}
             @if (count($post->tags) > 0)
             <div class="mt-2">

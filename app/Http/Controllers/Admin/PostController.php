@@ -6,13 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 use App\Post;
 use App\Category;
 use App\Tag;
+use phpDocumentor\Reflection\Types\Nullable;
 
 class PostController extends Controller
 {
+    
     /**
      * Display a listing of the resource.
      *
@@ -20,7 +23,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::all();
+        // $posts = Post::all();
         $user = Auth::user();
         $posts = ($user-> posts);
 
@@ -53,8 +56,10 @@ class PostController extends Controller
             'content' => 'required|string|max:65535',
             'published' => 'sometimes|accepted',
             'category_id' => 'nullable|exists:categories,id',
-            'tags' => 'nullable|exists:tags,id'
+            'tags' => 'nullable|exists:tags,id',
+            'image' => 'nullable'|'image'|'max:500',
         ]);
+    
         // prendo i dati dalla request e creo il post
         $data = $request->all();
         $newPost = new Post();
@@ -63,6 +68,10 @@ class PostController extends Controller
         $newPost->slug = $this->getSlug($data['title']);
 
         $newPost->published = isset($data['published']); // true o false
+
+        if(isset($data['image'])){
+            $newPost->image = Storage::put('uploads', $data['image']);
+        }
 
         //associo l'utente ai post che creiamo 
         $newPost-> user_id = Auth::id(); //Auth::id mi restituisce quale utente e' loggato e quindi salva i post su quel determinato utente
@@ -135,7 +144,8 @@ class PostController extends Controller
             'content' => 'required|string|max:65535',
             'published' => 'sometimes|accepted',
             'category_id' => 'nullable|exists:categories,id',
-            'tags' => 'nullable|exists:tags,id'
+            'tags' => 'nullable|exists:tags,id',
+            'image' => 'nullable'|'image'|'max:500',
         ]);
         // aggiornamento
         $data = $request->all();
@@ -146,6 +156,13 @@ class PostController extends Controller
         $post->fill($data);
 
         $post->published = isset($data['published']); // true o false
+
+        if(isset($data['image'])){
+            if($post->image){
+                Storage::delete($post->image);
+            }
+            $post->image = Storage::put('uploads', $data['image']);
+        }
 
         $post->save();
 
@@ -168,6 +185,10 @@ class PostController extends Controller
         //se user_id e' diverso dallo user_id loggato stampiamo errore 403(es. cambio id dalla barra di ricerca)
         if($post->user_id !== Auth::id()){
             abort(403);
+        }
+
+        if($post->image){
+            Storage::delete($post->image);
         }
 
         $post->delete();
