@@ -11,11 +11,17 @@ use Illuminate\Support\Facades\Storage;
 use App\Post;
 use App\Category;
 use App\Tag;
-use phpDocumentor\Reflection\Types\Nullable;
 
 class PostController extends Controller
 {
-    
+    private $validation = [
+        'title' => 'required|string|max:255',
+        'content' => 'required|string|max:65535',
+        'published' => 'sometimes|accepted',
+        'category_id' => 'nullable|exists:categories,id',
+        'tags' => 'nullable|exists:tags,id',
+        'image' => 'nullable|image|max:500'
+    ];
     /**
      * Display a listing of the resource.
      *
@@ -25,7 +31,7 @@ class PostController extends Controller
     {
         // $posts = Post::all();
         $user = Auth::user();
-        $posts = ($user-> posts);
+        $posts = $user->posts;
 
         return view('admin.posts.index', compact('posts'));
     }
@@ -37,9 +43,10 @@ class PostController extends Controller
      */
     public function create()
     {
-        $categories= Category::all();
-        $tags= Tag::all();
-        return view('admin.posts.create', compact('categories','tags'));
+        $categories = Category::all();
+        $tags = Tag::all();
+
+        return view('admin.posts.create', compact('categories', 'tags'));
     }
 
     /**
@@ -50,18 +57,7 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        // validazione
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string|max:65535',
-            'published' => 'sometimes|accepted',
-            'category_id' => 'nullable|exists:categories,id',
-            'tags' => 'nullable|exists:tags,id',
-            'image' => 'nullable'|'image'|'max:500',
-        ]);
-    
-        // prendo i dati dalla request e creo il post
-        $data = $request->all();
+        $data = $request->validate($this->validation);
         $newPost = new Post();
         $newPost->fill($data);
 
@@ -69,17 +65,18 @@ class PostController extends Controller
 
         $newPost->published = isset($data['published']); // true o false
 
-        if(isset($data['image'])){
+        // associo l'utente al post
+        $newPost->user_id = Auth::id(); // mi restituisce l'id dell'utente loggato
+
+        // aggiungo l'immagine se è presente
+        if(isset($data['image'])) {
             $newPost->image = Storage::put('uploads', $data['image']);
         }
 
-        //associo l'utente ai post che creiamo 
-        $newPost-> user_id = Auth::id(); //Auth::id mi restituisce quale utente e' loggato e quindi salva i post su quel determinato utente
         $newPost->save();
 
-        // se sono presenti dei tag inerenti, li assiciamo al post appena creato;
-        // con questo metodo andiamo a popolare la tabella pivot con i tag associat ad un determinato post
-        if (isset($data['tags'])){
+        // se ci sono dei tags associati, li associo al post appena creato
+        if(isset($data['tags'])) {
             $newPost->tags()->sync($data['tags']);
         }
         // redirect alla pagina del post appena creato
@@ -94,10 +91,10 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //se user_id e' diverso dallo user_id loggato stampiamo errore 403(es. cambio id dalla barra di ricerca)
-        if($post->user_id !== Auth::id()){
+        if($post->user_id !== Auth::id()) {
             abort(403);
         }
+
         return view('admin.posts.show', compact('post'));
     }
 
@@ -109,19 +106,18 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //se user_id e' diverso dallo user_id loggato stampiamo errore 403(es. cambio id dalla barra di ricerca)
-        if($post->user_id !== Auth::id()){
+        if($post->user_id !== Auth::id()) {
             abort(403);
         }
 
-        $categories= Category::all();
+        $categories = Category::all();
         $tags = Tag::all();
 
-        // andiamo a fare un controllo su quale tags era stato precedente chekkato passando i tag asscoiati, e il loro id, infine gli mettiamo in un array(toArray)
-        $postTags = $post->tags->map(function ($item){
-            return $item->id;
+        $postTags = $post->tags->map(function ($tag) {
+            return $tag->id;
         })->toArray();
-        return view('admin.posts.edit', compact('post','categories','tags', 'postTags'));
+        // [], [1,2]
+        return view('admin.posts.edit', compact('post', 'categories', 'tags', 'postTags'));
     }
 
     /**
@@ -133,20 +129,12 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        //se user_id e' diverso dallo user_id loggato stampiamo errore 403(es. cambio id dalla barra di ricerca)
-        if($post->user_id !== Auth::id()){
+        if($post->user_id !== Auth::id()) {
             abort(403);
         }
-        
+
         // validazione
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string|max:65535',
-            'published' => 'sometimes|accepted',
-            'category_id' => 'nullable|exists:categories,id',
-            'tags' => 'nullable|exists:tags,id',
-            'image' => 'nullable'|'image'|'max:500',
-        ]);
+        $request->validate($this->validation);
         // aggiornamento
         $data = $request->all();
         // se cambia il titolo genero un altro slug
@@ -157,18 +145,18 @@ class PostController extends Controller
 
         $post->published = isset($data['published']); // true o false
 
-        if(isset($data['image'])){
-            if($post->image){
+        if(isset($data['image'])) {
+            if($post->image) {
                 Storage::delete($post->image);
             }
+
             $post->image = Storage::put('uploads', $data['image']);
         }
 
         $post->save();
 
-        $tags =isset($data['tags']) ? $data['tags'] : [];
-        
-        //andiamo a togliere i tags associati dalla tabella pivot in caso di check vuota
+        $tags = isset($data['tags']) ? $data['tags'] : [];
+
         $post->tags()->sync($tags);
         // redirect
         return redirect()->route('admin.posts.show', $post->id);
@@ -182,12 +170,11 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //se user_id e' diverso dallo user_id loggato stampiamo errore 403(es. cambio id dalla barra di ricerca)
-        if($post->user_id !== Auth::id()){
+        if($post->user_id !== Auth::id()) {
             abort(403);
         }
 
-        if($post->image){
+        if($post->image) {
             Storage::delete($post->image);
         }
 

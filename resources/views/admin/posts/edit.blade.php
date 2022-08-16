@@ -28,7 +28,7 @@
                         <label for="image">Immagine</label>
                         @if($post->image)
                         <div class="mb-4">
-                            <img class="img-fluid" src="{{asset("storage/{$post->image}")}}" alt="">
+                            <img width="250" src="{{asset("storage/{$post->image}")}}" alt="">
                         </div>
                         @endif
                         <input type="file" class="form-control-file @error('image') is-invalid @enderror" id="iamge" name="image" value="{{old('image')}}">
